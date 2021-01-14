@@ -6,4 +6,19 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+router.get('/register',function(req,res){
+  res.render('register')
+});
+
+
+
+router.get('/quickaccess',function(req,res){
+  res.redirect('/quickaccess')
+})
+
+router.get('/home',function(req,res){
+  res.redirect('/home')
+});
+
+
 module.exports = router;

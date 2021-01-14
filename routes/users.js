@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
+var mongoose =  require('mongoose');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+mongoose.connect('mongodb://localhost:27017/restAPI', { useNewUrlParser: true },{ useUnifiedTopology: true });
 
-module.exports = router;
+var articleSchema = mongoose.Schema({
+  title:String,
+  content: String
+})
+module.exports = mongoose.model('Article', articleSchema)
