@@ -1,9 +1,14 @@
 var mongoose =  require('mongoose');
+var plm =require('passport-local-mongoose');
+mongoose.connect('mongodb://localhost:27017/customerAPI', { useNewUrlParser: true },{ useUnifiedTopology: true });
 
-mongoose.connect('mongodb://localhost:27017/restAPI', { useNewUrlParser: true },{ useUnifiedTopology: true });
-
-var articleSchema = mongoose.Schema({
-  title:String,
-  content: String
+var customerSchema = mongoose.Schema({
+  name: String,
+  username: String,
+  password: String,
+  location: String
 })
-module.exports = mongoose.model('Article', articleSchema)
+
+customerSchema.plugin(plm);
+
+module.exports = mongoose.model('Customer', customerSchema)

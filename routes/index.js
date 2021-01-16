@@ -1,8 +1,13 @@
 var express = require('express');
 var router = express.Router();
+var Customer = require('./users');
+var passport = require('passport');
+var passportLocal = require('passport-local');
+var clean = require('./cleaning')
 
+passport.use(new passportLocal(Customer.authenticate()));
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/',redirectToProfile, function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
@@ -10,15 +15,73 @@ router.get('/register',function(req,res){
   res.render('register')
 });
 
-
-
-router.get('/quickaccess',function(req,res){
-  res.redirect('/quickaccess')
+router.post('/register', function(req,res){
+  var newuser = Customer({
+    name: req.body.name,
+    username: req.body.username
+  })
+  Customer.register(newuser, req.body.password)
+  .then(function(registered){
+    passport.authenticate('local')(req,res,function(){
+      res.redirect('/quickaccess')
+    })
+  })
 })
 
-router.get('/home',function(req,res){
-  res.redirect('/home')
-});
+router.get('/quickaccess',isloggedin , function(req,res){
+  res.render('quickaccess')
+})
 
+router.post('/login',passport.authenticate('local', {
+  successRedirect: '/quickaccess',
+  failureRedirect:'/'
+}), function(req,res){
+
+})
+router.get('/logout', function(req,res){
+  req.logout();
+  res.redirect('/');
+})
+function isloggedin(req,res,next){
+  if(req.isAuthenticated()){
+    return next()
+  }
+  else{
+    res.redirect('/')
+  }
+
+}
+function redirectToProfile(req,res,next){
+  if(req.isAuthenticated()){
+    res.redirect('/myprofile')
+  }
+  else{
+    return next();
+  }
+}
+//postman stuff
+router.post("/cleaning", function(req,res){
+  const newclean = new clean(req.body)
+  console.log(req.body);
+  newclean.save();
+})
+
+router.get('/cleaning', async(req,res)=>{
+  try{
+    const getclean = await clean.find({});
+  res.send(getclean);
+  }catch(e){
+    res.status(400).send(e);
+  }
+})
+router.get('/cleaning/:id', async(req,res)=>{
+  try{
+    const _id = req.params.id;
+  const getindividual = await clean.findById(_id);
+  res.send(getindividual);
+  }catch(e){
+    res.status(400).send(e);
+  }
+})
 
 module.exports = router;

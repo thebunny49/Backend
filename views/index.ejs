@@ -9,5 +9,11 @@
     <p>Welcome to <%= title %></p>
     <h1>This is Login Screen. If you want to register Click here</h1>
     <a href="/register">register here</a>
+    <form action="/login" method="post">
+    
+      <input type="text" name="username" placeholder="Author Username"><br><br>
+      <input type="password" name="password" placeholder="password"><br><br>
+      <input type="submit" value="Login"><br>
+    </form>
   </body>
 </html>
