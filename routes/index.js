@@ -3,7 +3,7 @@ var router = express.Router();
 var Customer = require('./users');
 var passport = require('passport');
 var passportLocal = require('passport-local');
-var clean = require('./cleaning')
+var clean = require('./seller')
 
 passport.use(new passportLocal(Customer.authenticate()));
 /* GET home page. */
@@ -28,13 +28,13 @@ router.post('/register', function(req,res){
   })
 })
 
-router.get('/quickaccess',isloggedin , function(req,res){
+router.get('/quickaccess',isLoggedIn , function(req,res){
   res.render('quickaccess')
 })
 
 router.post('/login',passport.authenticate('local', {
   successRedirect: '/quickaccess',
-  failureRedirect:'/'
+  failureRedirect:'/index'
 }), function(req,res){
 
 })
@@ -42,24 +42,25 @@ router.get('/logout', function(req,res){
   req.logout();
   res.redirect('/');
 })
-function isloggedin(req,res,next){
+function isLoggedIn(req,res,next){
   if(req.isAuthenticated()){
-    return next()
+    return next();
   }
   else{
-    res.redirect('/')
+    req.flash('error', 'You need to Login First!')
+    res.redirect('/login')
   }
-
 }
 function redirectToProfile(req,res,next){
   if(req.isAuthenticated()){
-    res.redirect('/myprofile')
+    res.redirect('/quickaccess')
   }
   else{
     return next();
   }
 }
 //postman stuff
+//
 router.post("/cleaning", function(req,res){
   const newclean = new clean(req.body)
   console.log(req.body);
@@ -74,14 +75,14 @@ router.get('/cleaning', async(req,res)=>{
     res.status(400).send(e);
   }
 })
-router.get('/cleaning/:id', async(req,res)=>{
-  try{
-    const _id = req.params.id;
-  const getindividual = await clean.findById(_id);
-  res.send(getindividual);
-  }catch(e){
-    res.status(400).send(e);
-  }
+
+//get details by location
+router.get('/cleaning/:location', function(req,res){
+  clean.find({location: req.params.location})
+  .then(function(getindividual){
+    res.send(getindividual);
+    res.render('cleaning', {getindividual: getindividual})
+  })
 })
 
 module.exports = router;

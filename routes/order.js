@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
 
-var cleanSchema = mongoose.Schema({
-    shopname: {
+var orderSchema = mongoose.Schema({
+    id: {
         type: String,
         required: true
     },
-    rating: {
+    Description: {
         type: Number,
         required: true
     },
@@ -15,4 +15,4 @@ var cleanSchema = mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Clean', cleanSchema)
+module.exports = mongoose.model('order', orderSchema)
