@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 var Customer = require('./users');
 var passport = require('passport');
 var passportLocal = require('passport-local');
-
+const seller = require('./sellermodel');
 const User = require('./customermodel');
 
 passport.use(new passportLocal(Customer.authenticate()));
@@ -18,7 +18,7 @@ router.get('/register',function(req,res){
 });
 
 router.post(
-  '/register',
+  '/user/register',
   passport.authenticate('signup', { session: false }),
   async (req, res, next) => {
     res.json({
@@ -33,7 +33,7 @@ router.get('/quickaccess',isLoggedIn , function(req,res){
 })
 
 router.post(
-  '/login',
+  '/user/login',
   async (req, res, next) => {
     passport.authenticate(
       'login',
@@ -51,8 +51,53 @@ router.post(
             async (error) => {
               if (error) return next(error);
 
-              const body = { _id: user._id, email: user.email, fullname:user.fullname };
+              const body = { _id: user._id, email: user.email };
               const token = jwt.sign({ user: body }, 'TOP_SECRET');
+
+              return res.json({ token });
+            }
+          );
+        } catch (error) {
+          return next(error);
+        }
+      }
+    )(req, res, next);
+  }
+);
+
+//SELLER SIDE LOGIN SIGNUP
+router.post(
+  '/seller/register',
+  passport.authenticate('signup', { session: false }),
+  async (req, res, next) => {
+    res.json({
+      message: 'Signup successful',
+      user: req.user
+    });
+  }
+);
+
+router.post(
+  '/seller/login',
+  async (req, res, next) => {
+    passport.authenticate(
+      'login',
+      async (err, seller, info) => {
+        try {
+          if (err || !seller) {
+            const error = new Error('An error occurred.');
+
+            return next(error);
+          }
+
+          req.login(
+            seller,
+            { session: false },
+            async (error) => {
+              if (error) return next(error);
+
+              const body = { _id: seller._id, email: seller.email };
+              const token = jwt.sign({ seller: body }, 'TOP_SECRET');
 
               return res.json({ token });
             }
