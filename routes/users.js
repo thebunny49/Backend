@@ -1,6 +1,5 @@
 var mongoose =  require('mongoose');
 var plm =require('passport-local-mongoose');
-mongoose.connect('mongodb://localhost:27017/customerAPI', { useNewUrlParser: true },{ useUnifiedTopology: true });
 
 var customerSchema = mongoose.Schema({
   name: String,
