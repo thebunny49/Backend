@@ -14,6 +14,11 @@ const SellerSchema = new Schema({
     type: String,
     required: true
   },
+  orderID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true
+  }
 //   shopname: {
 //     type: String,
 //     required: true
