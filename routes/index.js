@@ -5,8 +5,8 @@ var Customer = require('./users');
 var passport = require('passport');
 var passportLocal = require('passport-local');
 const seller = require('./sellermodel');
-const User = require('./customermodel');
-
+const order = require('./orderModel');
+const UserModel = require('./customermodel');
 passport.use(new passportLocal(Customer.authenticate()));
 /* GET home page. */
 router.get('/',redirectToProfile, function(req, res, next) {
@@ -53,8 +53,24 @@ router.post(
 
               const body = { _id: user._id, email: user.email };
               const token = jwt.sign({ user: body }, 'TOP_SECRET');
-
-              return res.json({ token });
+              // UserModel.find({_id: body._id})
+              // .then(function(_id){
+              //   console.log(_id)
+              //   console.log(token)
+              // })
+              console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>..");
+              console.log(token);
+              await UserModel.findOneAndUpdate({_id:body._id},{$set:{userAPi:token}}, {new:true},function(err, user) {
+                console.log(err);
+                console.log(user);
+                return res.status(400).send({
+                    message: "Response Update Successfully" ,
+                    data: user
+                })
+              })
+              // console.log(token)
+              // console.log(body._id)
+            
             }
           );
         } catch (error) {
@@ -149,7 +165,7 @@ router.get('/cleaning', async(req,res)=>{
 })
 //individual seller from customer side
 router.get('/cleaning/:id', function(req,res){
-  clean.findById(req.params.id)
+  UserModel.findById(req.params.id)
   .then(function(getindi){
     res.send(getindi);
     res.render('cleaning', {getindi: getindi})
@@ -163,12 +179,26 @@ router.get('/cleaning/:location', function(req,res){
     res.render('cleaning', {getindividual: getindividual})
   })
 })
-router.get('/cleaning/booknow', function(req,res){
-  clean.find({api: req.params.api})
-  .then(function(found){
-    res.send(found)
-  })
-})
+// router.get('/cleaning/booknow', function(req,res){
+//   clean.find({api: req.params.api})
+//   .then(function(found){
+//     res.send(found)
+//   })
+// });
+
+router.post("/order/:id", async (req, res) => {
+  order.find({typeof: req.params.typeof})
+  const newOrder = new Order({
+    
+    name: req.body.name,
+    user: req.user._id,
+    location: req.body.location,
+    orderID: req.orderID,
+    
+  });
+  const newOrderCreated = await newOrder.save();
+  res.status(201).send({ message: "New Order Created", data: newOrderCreated });
+});
 
 // //BEAUTY SiDE
 // //seller post services 

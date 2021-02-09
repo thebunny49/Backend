@@ -17,7 +17,11 @@ const UserSchema = new Schema({
   orderID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
-    required: true
+    
+  },
+  
+  userAPi:{
+    type: String
   }
 });
 UserSchema.pre(
