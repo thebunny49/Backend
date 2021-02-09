@@ -7,6 +7,7 @@ var passportLocal = require('passport-local');
 const seller = require('./sellermodel');
 const order = require('./orderModel');
 const UserModel = require('./customermodel');
+const SellerModel = require('./sellermodel');
 passport.use(new passportLocal(Customer.authenticate()));
 /* GET home page. */
 router.get('/',redirectToProfile, function(req, res, next) {
@@ -84,7 +85,7 @@ router.post(
 //SELLER SIDE LOGIN SIGNUP
 router.post(
   '/seller/register',
-  passport.authenticate('signup', { session: false }),
+  passport.authenticate('sellerSignUp', { session: false }),
   async (req, res, next) => {
     res.json({
       message: 'Signup successful',
@@ -97,25 +98,41 @@ router.post(
   '/seller/login',
   async (req, res, next) => {
     passport.authenticate(
-      'login',
-      async (err, seller, info) => {
+      'sellerLogin',
+      async (err, user, info) => {
         try {
-          if (err || !seller) {
+          if (err || !user) {
             const error = new Error('An error occurred.');
 
             return next(error);
           }
 
           req.login(
-            seller,
+            user,
             { session: false },
             async (error) => {
               if (error) return next(error);
 
-              const body = { _id: seller._id, email: seller.email };
-              const token = jwt.sign({ seller: body }, 'TOP_SECRET');
-
-              return res.json({ token });
+              const body = { _id: user._id, email: user.email };
+              const token = jwt.sign({ user: body }, 'TOP_SECRET');
+              // UserModel.find({_id: body._id})
+              // .then(function(_id){
+              //   console.log(_id)
+              //   console.log(token)
+              // })
+              //console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>..");
+              //console.log(token);
+              await SellerModel.findOneAndUpdate({_id:body._id},{$set:{userAPi:token}}, {new:true},function(err, user) {
+                //console.log(err);
+                //console.log(user);
+                return res.status(400).send({
+                    message: "Response Update Successfully" ,
+                    data: user
+                })
+              })
+              // console.log(token)
+              // console.log(body._id)
+            
             }
           );
         } catch (error) {
@@ -179,6 +196,67 @@ router.get('/cleaning/:location', function(req,res){
     res.render('cleaning', {getindividual: getindividual})
   })
 })
+
+router.post('/user/editProfile/:userAPi', function(req,res){
+  UserModel.findOneAndUpdate({userAPI: req.params.token},{
+    email: req.body.email,
+    name: req.body.name,
+    mobile: req.body.mobile,
+    location: req.body.location
+  }, {new:true})
+  .then(function(user){
+    console.log(user.location)
+    
+    res.send('correct');
+  })
+})
+
+// router.post('/seller/editProfile/:userAPi', function(req,res){
+//   SellerModel.findOneAndUpdate({userAPi: req.params.token},{
+//     email: req.body.email,
+//     name: req.body.name,
+//     mobile: req.body.mobile,
+//     location: req.body.location
+//   }, {new:true})
+//   .then(function(data){
+//     console.log(data)
+    
+//     res.send('correct');
+//   })
+// })
+router.post ('/seller/editProfile/:userAPi',async function(req,res){
+  console.log("agubai",req.body);
+  // {userAPi:req.params.userAPi}
+  // return await SellerModel.create({
+  //   email:'gg',
+  //   password:'gg'
+
+  // }).then((response)=>{
+  //   console.log(response)
+  //   return res.send({
+  //      message:"makachu bete",
+  //      data:response
+  //    })
+  //  })
+
+ await SellerModel.findOneAndUpdate({userAPi:req.params.userAPi},{$set:{
+    email: req.body.email,
+    name: req.body.name,
+    mobile: req.body.mobile,
+    location: req.body.location
+  }}, {new:false},function(err, user) {
+ 
+    return res.status(200).send({
+        message: "Response Update Successfully" ,
+        data: user,
+       
+
+    })
+  })
+
+
+})
+
 // router.get('/cleaning/booknow', function(req,res){
 //   clean.find({api: req.params.api})
 //   .then(function(found){
@@ -199,6 +277,19 @@ router.post("/order/:id", async (req, res) => {
   const newOrderCreated = await newOrder.save();
   res.status(201).send({ message: "New Order Created", data: newOrderCreated });
 });
+
+router.post('/user/allService/:userAPi', function(req,res){
+  UserModel.find({userAPI: req.params.userAPi})
+  .then(function(user){
+    return SellerModel.find().where({userAPi: userAPi}).then((location)=>{
+         console.log(location)
+         return res.send({
+            message:"agubai",
+            data:location
+          })
+        })
+  })
+})
 
 // //BEAUTY SiDE
 // //seller post services 

@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const UserModel = require('./routes/customermodel');
+const SellerModel = require('./routes/sellermodel');
 var expressSession = require('express-session');
 var passport = require('passport');
 var indexRouter = require('./routes/index');
@@ -55,6 +56,24 @@ passport.use(
   )
 );
 passport.use(
+  'sellerSignUp',
+  new localStrategy(
+    {
+      usernameField: 'email',
+      passwordField: 'password'
+    },
+    async (email, password, done) => {
+      try {
+        const user = await SellerModel.create({ email, password });
+
+        return done(null, user);
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
+);
+passport.use(
   'login',
   new localStrategy(
     {
@@ -64,6 +83,34 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await UserModel.findOne({ email });
+
+        if (!user) {
+          return done(null, false, { message: 'User not found' });
+        }
+
+        const validate = await user.isValidPassword(password);
+
+        if (!validate) {
+          return done(null, false, { message: 'Wrong Password' });
+        }
+
+        return done(null, user, { message: 'Logged in Successfully' });
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
+);
+passport.use(
+  'sellerLogin',
+  new localStrategy(
+    {
+      usernameField: 'email',
+      passwordField: 'password'
+    },
+    async (email, password, done) => {
+      try {
+        const user = await SellerModel.findOne({ email });
 
         if (!user) {
           return done(null, false, { message: 'User not found' });

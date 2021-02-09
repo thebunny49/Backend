@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/sellerAPI');
+mongoose.connect('mongodb://localhost:27017/database');
 mongoose.connection.on('error', error => console.log(error) );
 mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
@@ -17,41 +17,42 @@ const SellerSchema = new Schema({
   orderID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
-    required: true
-  }
-//   shopname: {
-//     type: String,
-//     required: true
-// },
-// description: {
-//     type: String,
+   
+  },
+  shopname: {
+    type: String,
     
-// },
+},
+description: {
+    type: String,
+    
+},
 
-// fullname: {
-//     type: String,
-//     required: true
-// },
-// mobile: {
-//     type: Number,
-//     required: true
-// },
-
-
-// location:{
-//     city:{
-//         type:String,
-//         required:true
-//     },
-//     address:{
-//         type:String,
-//         required:true
-//     }
-// },
-// typeofservice:{
-//     type: String,
-//     required: true
-// }
+fullname: {
+    type: String,
+    
+},
+mobile: {
+    type: Number,
+    
+},
+location:{
+    city:{
+        type:String,
+        
+    },
+    address:{
+        type:String,
+     
+    }
+},
+typeofservice:{
+    type: String,
+    
+},
+userAPi:{
+  type: String
+}
 });
 SellerSchema.pre(
     'save',

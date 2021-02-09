@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/customerAPI');
+mongoose.connect('mongodb://localhost:27017/database');
 mongoose.connection.on('error', error => console.log(error) );
 mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
@@ -19,7 +19,18 @@ const UserSchema = new Schema({
     ref: 'user',
     
   },
-  
+  name: {
+    type: String,
+    
+  },
+  mobile: {
+    type: String,
+    
+  },
+  location: {
+    type: String,
+    
+  },
   userAPi:{
     type: String
   }
